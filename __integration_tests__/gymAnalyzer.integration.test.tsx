@@ -8,6 +8,7 @@ import * as frameExtractor from '../utils/frameExtractor';
 import * as geminiService from '../services/geminiService';
 import * as firestoreService from '../services/firestoreService';
 import { useAuth } from '../hooks/useAuth';
+import '@testing-library/jest-dom';
 
 // Mock dependencies
 jest.mock('../utils/frameExtractor');
@@ -16,13 +17,14 @@ jest.mock('../services/firestoreService');
 jest.mock('../hooks/useAuth');
 
 const mockUseAuth = useAuth as jest.Mock;
-// Fix: Add explicit types to mocks to prevent 'never' type inference errors
-const mockExtractFrames = frameExtractor.extractFramesFromVideo as jest.Mock<Promise<string[]>>;
-const mockAnalyzeVideo = geminiService.analyzeVideoWithFrames as jest.Mock<Promise<string>>;
-const mockGeneratePlan = geminiService.generateWorkoutPlan as jest.Mock<Promise<geminiService.WorkoutPlan>>;
-const mockExerciseExists = firestoreService.exerciseExists as jest.Mock<Promise<boolean>>;
-const mockSaveCommunityExercise = firestoreService.saveCommunityExercise as jest.Mock<Promise<void>>;
-const mockFindYouTubeVideo = geminiService.findYouTubeVideoForExercise as jest.Mock<Promise<string | null>>;
+// FIX: Use jest.MockedFunction for correct typing of mocks.
+const mockExtractFrames = frameExtractor.extractFramesFromVideo as jest.MockedFunction<typeof frameExtractor.extractFramesFromVideo>;
+const mockAnalyzeVideo = geminiService.analyzeVideoWithFrames as jest.MockedFunction<typeof geminiService.analyzeVideoWithFrames>;
+const mockGeneratePlan = geminiService.generateWorkoutPlan as jest.MockedFunction<typeof geminiService.generateWorkoutPlan>;
+const mockExerciseExists = firestoreService.exerciseExists as jest.MockedFunction<typeof firestoreService.exerciseExists>;
+const mockSaveCommunityExercise = firestoreService.saveCommunityExercise as jest.MockedFunction<typeof firestoreService.saveCommunityExercise>;
+const mockFindYouTubeVideo = geminiService.findYouTubeVideoForExercise as jest.MockedFunction<typeof geminiService.findYouTubeVideoForExercise>;
+const mockGetCommunityExercises = firestoreService.getCommunityExercises as jest.MockedFunction<typeof firestoreService.getCommunityExercises>;
 
 const mockUser = { uid: 'test-user' } as any;
 
@@ -31,13 +33,15 @@ describe('Gym Analyzer Integration Flow', () => {
         jest.clearAllMocks();
         mockUseAuth.mockReturnValue({ user: mockUser });
         // Default mocks for a clean slate
-        (firestoreService.getCommunityExercises as jest.Mock).mockResolvedValue([]);
+        // FIX: Use the correctly typed mock.
+        mockGetCommunityExercises.mockResolvedValue([]);
     });
 
     it('should handle the full flow: video upload, new equipment discovery (RAG), and plan generation', async () => {
         renderWithProviders(<GymAnalyzer user={mockUser} />);
         
         // 1. User uploads a video
+        // FIX: Use the correctly typed mock.
         mockExtractFrames.mockResolvedValue(['frame1', 'frame2']);
         const file = new File(['video'], 'gym.mp4', { type: 'video/mp4' });
         const input = screen.getByLabelText(/Tap to upload/i);
@@ -64,6 +68,7 @@ describe('Gym Analyzer Integration Flow', () => {
             - Dumbbell Curl
             - Sissy Squat
         `;
+        // FIX: Use the correctly typed mock.
         mockAnalyzeVideo.mockResolvedValue(analysisResult);
         // Mock the RAG check
         mockExerciseExists.mockImplementation(async (name: string) => {
@@ -84,6 +89,7 @@ describe('Gym Analyzer Integration Flow', () => {
         });
         
         // 5. User confirms adding the new equipment
+        // FIX: Use correctly typed mocks.
         mockFindYouTubeVideo.mockResolvedValue('http://youtube.com/sissy-squat');
         mockSaveCommunityExercise.mockResolvedValue(undefined);
         fireEvent.click(screen.getByRole('button', { name: /Yes, Add It!/i }));
@@ -105,6 +111,7 @@ describe('Gym Analyzer Integration Flow', () => {
 
         // 7. User clicks to generate the plan
         const mockPlan: geminiService.WorkoutPlan = [{ day: 'Day 1', exercises: [{ name: 'Sissy Squat', sets: '3', reps: '12' }] }];
+        // FIX: Use the correctly typed mock.
         mockGeneratePlan.mockResolvedValue(mockPlan);
 
         fireEvent.click(generateButton);
@@ -130,6 +137,7 @@ describe('Gym Analyzer Integration Flow', () => {
          renderWithProviders(<GymAnalyzer user={mockUser} />);
         
         // 1. User uploads a video
+        // FIX: Use the correctly typed mock.
         mockExtractFrames.mockResolvedValue(['frame1', 'frame2']);
         const file = new File(['video'], 'gym.mp4', { type: 'video/mp4' });
         const input = screen.getByLabelText(/Tap to upload/i);
@@ -140,6 +148,7 @@ describe('Gym Analyzer Integration Flow', () => {
         
         // 3. Mock the failure
         const error = new Error("Model is overloaded");
+        // FIX: Use the correctly typed mock.
         mockAnalyzeVideo.mockRejectedValue(error);
         
         // 4. Verify the error message is displayed

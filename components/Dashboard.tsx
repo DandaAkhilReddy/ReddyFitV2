@@ -197,7 +197,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, userProfile }) => {
         } finally {
             setIsLoading(false);
             setLoadingMessage('');
-            event.target.value = '';
+            // Reset file input so the same file can be selected again
+            if(event.target){
+                event.target.value = '';
+            }
         }
     };
     
@@ -226,15 +229,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, userProfile }) => {
                     htmlFor="meal-upload" 
                     className="flex flex-col items-center justify-center w-full h-40 border-2 border-slate-600 border-dashed rounded-lg cursor-pointer bg-slate-800/50 hover:bg-slate-700/50 hover:border-amber-500 transition-all duration-300 group"
                 >
-                    {isLoading && !loadingMessage.includes('dashboard') ? <Loader text={loadingMessage} /> :
-                    (<>
+                    {isLoading && !loadingMessage.includes('dashboard') ? (
+                        <Loader text={loadingMessage} />
+                    ) : (
                         <div className="flex flex-col items-center justify-center text-center">
                             <UploadIcon className="w-8 h-8 mb-2 text-slate-500 group-hover:text-amber-400 transition-colors"/>
                             <p className="text-sm text-slate-300"><span className="font-semibold text-amber-400">Tap to upload</span> a photo</p>
                             <p className="text-xs text-slate-500">The AI will analyze it and log your nutrition!</p>
                         </div>
-                        <input id="meal-upload" type="file" className="hidden" accept="image/*" onChange={handleFileChange} disabled={isLoading}/>
-                    </>)}
+                    )}
+                    <input id="meal-upload" type="file" className="hidden" accept="image/*" onChange={handleFileChange} disabled={isLoading}/>
                 </label>
             </div>
             

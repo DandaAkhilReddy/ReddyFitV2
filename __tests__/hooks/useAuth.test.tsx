@@ -8,6 +8,7 @@ import { auth } from '../../firebase';
 import { useToast } from '../../hooks/useToast';
 import { UserProfile } from '../../services/firestoreService';
 import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 
 // Mock dependencies
 jest.mock('../../firebase', () => ({

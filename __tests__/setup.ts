@@ -1,5 +1,6 @@
 // __tests__/setup.ts
 import { jest } from '@jest/globals';
+import '@testing-library/jest-dom';
 
 // Mock for URL.createObjectURL and revokeObjectURL which are used in frameExtractor and other places
 global.URL.createObjectURL = jest.fn(() => 'mock-object-url');
@@ -48,7 +49,7 @@ class MockMediaRecorder {
     }
 }
 
-global.MediaRecorder = MockMediaRecorder as any;
+global.MediaRecorder = MockMediaRecorder as unknown as typeof MediaRecorder;
 
 // Mock for localStorage used in useUserPreferences
 const localStorageMock = (() => {

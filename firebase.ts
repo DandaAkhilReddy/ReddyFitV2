@@ -1,4 +1,5 @@
 // Import the functions you need from the SDKs you need
+// Fix: Use compat imports for v8 syntax
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";

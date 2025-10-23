@@ -352,7 +352,7 @@ export const getChatResponseStream = (
         });
         const lastMessage = history[history.length -1];
         const message = lastMessage.parts[0].text;
-        return chat.sendMessageStream(message);
+        return chat.sendMessageStream({ message });
     } catch (e) {
         console.error(`Error in chat stream:`, e);
         const error = e instanceof Error ? e : new Error(String(e));

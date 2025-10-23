@@ -7,6 +7,7 @@ import { Dashboard } from '../components/Dashboard';
 import * as geminiService from '../services/geminiService';
 import * as firestoreService from '../services/firestoreService';
 import { useAuth } from '../hooks/useAuth';
+import '@testing-library/jest-dom';
 
 // Mock dependencies
 jest.mock('../services/geminiService');
@@ -14,12 +15,12 @@ jest.mock('../services/firestoreService');
 jest.mock('../hooks/useAuth');
 
 const mockUseAuth = useAuth as jest.Mock;
-// Fix: Add explicit types to mocks to prevent 'never' type inference errors
-const mockAnalyzeFoodImage = geminiService.analyzeFoodImage as jest.Mock<Promise<string[]>>;
-const mockGetNutritionalAnalysis = geminiService.getNutritionalAnalysis as jest.Mock<Promise<geminiService.NutritionalInfo>>;
-const mockUploadImage = firestoreService.uploadImage as jest.Mock<Promise<string>>;
-const mockSaveMealLog = firestoreService.saveMealLog as jest.Mock<Promise<void>>;
-const mockGetTodaysMealLogs = firestoreService.getTodaysMealLogs as jest.Mock<Promise<firestoreService.MealLog[]>>;
+// FIX: Use jest.MockedFunction for correct typing of mocks.
+const mockAnalyzeFoodImage = geminiService.analyzeFoodImage as jest.MockedFunction<typeof geminiService.analyzeFoodImage>;
+const mockGetNutritionalAnalysis = geminiService.getNutritionalAnalysis as jest.MockedFunction<typeof geminiService.getNutritionalAnalysis>;
+const mockUploadImage = firestoreService.uploadImage as jest.MockedFunction<typeof firestoreService.uploadImage>;
+const mockSaveMealLog = firestoreService.saveMealLog as jest.MockedFunction<typeof firestoreService.saveMealLog>;
+const mockGetTodaysMealLogs = firestoreService.getTodaysMealLogs as jest.MockedFunction<typeof firestoreService.getTodaysMealLogs>;
 
 const mockUser = { uid: 'test-user' } as any;
 const mockUserProfile = { displayName: 'Tester' } as any;
@@ -33,6 +34,7 @@ describe('Dashboard Meal Logging Integration Flow', () => {
 
     it('should allow a user to upload a meal, get AI analysis, and see the result in the UI', async () => {
         // 1. Initial state: No meal logs
+        // FIX: Use correctly typed mocks for resolved values.
         mockGetTodaysMealLogs.mockResolvedValue([]);
         renderWithProviders(<Dashboard user={mockUser} userProfile={mockUserProfile} />);
 
@@ -41,6 +43,7 @@ describe('Dashboard Meal Logging Integration Flow', () => {
         });
 
         // 2. Mocks for a successful flow
+        // FIX: Use correctly typed mocks for resolved values.
         mockAnalyzeFoodImage.mockResolvedValue(['Chicken Breast', 'Broccoli']);
         const mockNutrition: geminiService.NutritionalInfo = {
             calories: 350,
@@ -59,6 +62,7 @@ describe('Dashboard Meal Logging Integration Flow', () => {
             foodItems: ['Chicken Breast', 'Broccoli'],
             nutrition: mockNutrition,
         } as firestoreService.MealLog;
+        // FIX: Use correctly typed mocks for resolved values.
         mockGetTodaysMealLogs.mockResolvedValueOnce([]).mockResolvedValueOnce([newLog]);
 
         // 3. User selects a file
@@ -101,11 +105,13 @@ describe('Dashboard Meal Logging Integration Flow', () => {
 
     it('should show an error message if any part of the process fails', async () => {
         // 1. Initial state: No meal logs
+        // FIX: Use correctly typed mocks for resolved values.
         mockGetTodaysMealLogs.mockResolvedValue([]);
         renderWithProviders(<Dashboard user={mockUser} userProfile={mockUserProfile} />);
 
         // 2. Mock a failure in the pipeline (e.g., Gemini fails to analyze)
         const error = new Error("AI analysis failed");
+        // FIX: Use correctly typed mocks for resolved values.
         mockAnalyzeFoodImage.mockRejectedValue(error);
 
         // 3. User selects a file
