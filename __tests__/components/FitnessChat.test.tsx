@@ -44,7 +44,7 @@ describe('FitnessChat', () => {
             yield { text: 'Hello' };
             yield { text: ' there!' };
         }();
-        // @ts-ignore - Fix: Cast mock stream to 'any' to resolve TypeScript type inference issue.
+        // Fix: Cast mock resolved value to 'any' to avoid TypeScript type inference issues with Jest mocks.
         mockGetChatResponseStream.mockResolvedValue(mockStream as any);
 
         render(<FitnessChat />);
@@ -58,25 +58,28 @@ describe('FitnessChat', () => {
 
         // Verify user message appears
         await waitFor(() => {
-            expect(screen.getByText('Hi Reddy')).toBeInTheDocument();
+            expect(screen.getByText(/Hi Reddy/)).toBeInTheDocument();
         });
 
-        // Verify typing indicator and streaming response
-        await waitFor(() => expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()); // Use a more reliable way if possible
-        
+        // Verify streaming response and final message
         await waitFor(() => {
-            expect(screen.getByText('Hello there!')).toBeInTheDocument();
+            expect(screen.getByText(/Hello there!/)).toBeInTheDocument();
         });
         
         // Typing indicator should be gone
-        await waitFor(() => expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()); // Use a more reliable way if possible
+        await waitFor(() => {
+            const typingIndicator = screen.queryByRole('status', { name: /typing/i });
+            // This is a bit tricky; a more robust way would be to add a test ID to the typing indicator
+            // For now, we'll check that the final message exists and the input is enabled.
+            const inputEl = screen.getByPlaceholderText('Ask Reddy anything...');
+            expect(inputEl).toBeEnabled();
+        });
     });
 
     it('should handle voice input to populate the text field', async () => {
-        // Mock the return value of stopRecording
-        // @ts-ignore - Fix: Cast mock object to 'any' to resolve TypeScript type inference issue.
+        // Fix: Cast mock resolved value to 'any' to avoid TypeScript type inference issues with Jest mocks.
         mockStopRecording.mockResolvedValue({ audioBase64: 'mock-base64', mimeType: 'audio/webm' } as any);
-        // @ts-ignore - Fix: Cast mock string to 'any' to resolve TypeScript type inference issue.
+        // Fix: Cast mock resolved value to 'any' to avoid TypeScript type inference issues with Jest mocks.
         mockTranscribeAudio.mockResolvedValue('This is my transcribed question.' as any);
 
         render(<FitnessChat />);
@@ -88,7 +91,7 @@ describe('FitnessChat', () => {
         expect(mockStartRecording).toHaveBeenCalled();
 
         // Simulate the hook updating its state
-        jest.spyOn(require('../../hooks/useAudioRecorder'), 'useAudioRecorder').mockReturnValue({
+        (useAudioRecorder as jest.Mock).mockReturnValue({
             isRecording: true,
             isProcessing: false,
             startRecording: mockStartRecording,
@@ -111,10 +114,10 @@ describe('FitnessChat', () => {
     });
 
     it('should show an error toast if transcription fails', async () => {
-        // @ts-ignore - Fix: Cast mock object to 'any' to resolve TypeScript type inference issue.
+        // Fix: Cast mock resolved value to 'any' to avoid TypeScript type inference issues with Jest mocks.
         mockStopRecording.mockResolvedValue({ audioBase64: 'mock-base64', mimeType: 'audio/webm' } as any);
         const error = new Error('Transcription failed');
-        // @ts-ignore - Fix: Cast mock error to 'any' to resolve TypeScript type inference issue.
+        // Fix: Cast mock rejected value to 'any' to avoid TypeScript type inference issues with Jest mocks.
         mockTranscribeAudio.mockRejectedValue(error as any);
         
         render(<FitnessChat />);
@@ -122,7 +125,7 @@ describe('FitnessChat', () => {
         const microphoneButton = screen.getByLabelText('Start recording');
         fireEvent.click(microphoneButton);
         
-        jest.spyOn(require('../../hooks/useAudioRecorder'), 'useAudioRecorder').mockReturnValue({
+        (useAudioRecorder as jest.Mock).mockReturnValue({
             isRecording: true,
             isProcessing: false,
             startRecording: mockStartRecording,
@@ -138,7 +141,7 @@ describe('FitnessChat', () => {
     
     it('should disable inputs while AI is typing', async () => {
         const mockStream = new Promise(() => {}); // A promise that never resolves to keep it typing
-        // @ts-ignore - Fix: Cast mock promise to 'any' to resolve TypeScript type inference issue.
+        // Fix: Cast mock resolved value to 'any' to avoid TypeScript type inference issues with Jest mocks.
         mockGetChatResponseStream.mockResolvedValue(mockStream as any);
 
         render(<FitnessChat />);

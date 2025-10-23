@@ -4,7 +4,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { ExerciseLibrary } from '../../components/ExerciseLibrary';
 import * as firestoreService from '../../services/firestoreService';
-import { exercises as baseExercises } from '../../data/exercises';
 
 // Mock dependencies
 jest.mock('../../services/firestoreService');
@@ -57,7 +56,7 @@ describe('ExerciseLibrary', () => {
         render(<ExerciseLibrary />);
         await waitFor(() => expect(screen.getByText('Barbell Squat')).toBeInTheDocument());
 
-        const muscleFilter = screen.getByRole('combobox', { name: /muscles/i });
+        const muscleFilter = screen.getByRole('combobox', { name: "" }); // Find by implicit label
         fireEvent.change(muscleFilter, { target: { value: 'Chest' } });
 
         expect(screen.getByText('Barbell Bench Press')).toBeInTheDocument();
@@ -68,7 +67,7 @@ describe('ExerciseLibrary', () => {
         render(<ExerciseLibrary />);
         await waitFor(() => expect(screen.getByText('Barbell Squat')).toBeInTheDocument());
 
-        const difficultyFilter = screen.getByRole('combobox', { name: /difficulties/i });
+        const difficultyFilter = screen.getAllByRole('combobox')[1];
         fireEvent.change(difficultyFilter, { target: { value: 'Beginner' } });
 
         expect(screen.getByText('Leg Press')).toBeInTheDocument();
@@ -79,7 +78,7 @@ describe('ExerciseLibrary', () => {
         render(<ExerciseLibrary />);
         await waitFor(() => expect(screen.getByText('Barbell Squat')).toBeInTheDocument());
 
-        const equipmentFilter = screen.getByRole('combobox', { name: /equipment/i });
+        const equipmentFilter = screen.getAllByRole('combobox')[2];
         fireEvent.change(equipmentFilter, { target: { value: 'Bodyweight' } });
 
         expect(screen.getByText('Plank')).toBeInTheDocument();

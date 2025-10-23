@@ -17,7 +17,7 @@ describe('useUserPreferences', () => {
     beforeEach(() => {
         // Clear mocks and localStorage before each test
         setItemSpy.mockClear();
-        window.localStorage.clear();
+        (window.localStorage.clear as jest.Mock)();
     });
     
     afterEach(() => {

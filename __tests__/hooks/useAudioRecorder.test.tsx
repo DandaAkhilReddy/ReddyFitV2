@@ -6,21 +6,12 @@ import { useToast } from '../../hooks/useToast';
 import React from 'react';
 
 // Mock dependencies
-jest.mock('../../hooks/useToast', () => ({
-    useToast: jest.fn(),
-}));
+jest.mock('../../hooks/useToast');
 
-// FIX: Use jest.Mock<any> to satisfy TypeScript compiler
-const mockUseToast = useToast as jest.Mock<any>;
+const mockUseToast = useToast as jest.Mock;
 const mockShowToast = jest.fn();
 
-// We need a wrapper to provide the ToastContext, even though it's mocked
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-);
-
-// FIX: Use jest.Mock<any> to satisfy TypeScript compiler
-const mockGetUserMedia = navigator.mediaDevices.getUserMedia as jest.Mock<any>;
+const mockGetUserMedia = navigator.mediaDevices.getUserMedia as jest.Mock;
 
 describe('useAudioRecorder', () => {
     beforeEach(() => {
@@ -29,23 +20,23 @@ describe('useAudioRecorder', () => {
     });
 
     it('should initialize with correct default state', () => {
-        const { result } = renderHook(() => useAudioRecorder(), { wrapper });
+        const { result } = renderHook(() => useAudioRecorder());
         expect(result.current.isRecording).toBe(false);
         expect(result.current.isProcessing).toBe(false);
     });
 
     it('should start recording successfully', async () => {
+        // Fix: Cast mock resolved value to 'any' to avoid TypeScript type inference issues with Jest mocks.
         mockGetUserMedia.mockResolvedValue({
             getTracks: () => [{ stop: jest.fn() }],
-        } as unknown as MediaStream);
+        } as any);
 
-        const { result } = renderHook(() => useAudioRecorder(), { wrapper });
+        const { result } = renderHook(() => useAudioRecorder());
 
         await act(async () => {
             result.current.startRecording();
         });
         
-        // Let the asynchronous start process complete
         await waitFor(() => {
             expect(result.current.isRecording).toBe(true);
         });
@@ -53,9 +44,10 @@ describe('useAudioRecorder', () => {
 
     it('should handle microphone permission denial', async () => {
         const error = new Error("Permission denied");
-        mockGetUserMedia.mockRejectedValue(error);
+        // Fix: Cast mock rejected value to 'any' to avoid TypeScript type inference issues with Jest mocks.
+        mockGetUserMedia.mockRejectedValue(error as any);
 
-        const { result } = renderHook(() => useAudioRecorder(), { wrapper });
+        const { result } = renderHook(() => useAudioRecorder());
 
         await act(async () => {
             result.current.startRecording();
@@ -66,11 +58,12 @@ describe('useAudioRecorder', () => {
     });
 
     it('should stop recording and process audio data successfully', async () => {
+        // Fix: Cast mock resolved value to 'any' to avoid TypeScript type inference issues with Jest mocks.
         mockGetUserMedia.mockResolvedValue({
             getTracks: () => [{ stop: jest.fn() }],
-        } as unknown as MediaStream);
+        } as any);
         
-        const { result } = renderHook(() => useAudioRecorder(), { wrapper });
+        const { result } = renderHook(() => useAudioRecorder());
 
         // Start recording first
         await act(async () => {
@@ -98,18 +91,17 @@ describe('useAudioRecorder', () => {
         // Mock FileReader to fail
         const readAsDataURLSpy = jest.spyOn(FileReader.prototype, 'readAsDataURL').mockImplementation(function (this: FileReader) {
             if (this.onerror) {
-                // We need to trigger the onerror callback, but it expects a ProgressEvent
-                // For simplicity in a test, a simple object will suffice if the handler doesn't use event properties.
                 const errorEvent = { target: { error: new DOMException('Mock read error') } } as ProgressEvent<FileReader>;
                 (this.onerror as any)(errorEvent);
             }
         });
 
+        // Fix: Cast mock resolved value to 'any' to avoid TypeScript type inference issues with Jest mocks.
         mockGetUserMedia.mockResolvedValue({
             getTracks: () => [{ stop: jest.fn() }],
-        } as unknown as MediaStream);
+        } as any);
         
-        const { result } = renderHook(() => useAudioRecorder(), { wrapper });
+        const { result } = renderHook(() => useAudioRecorder());
 
         await act(async () => {
             result.current.startRecording();

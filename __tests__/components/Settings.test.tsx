@@ -91,7 +91,7 @@ describe('Settings', () => {
     it('should call dbService.clearAllData when "Clear Cached App Data" is clicked and confirmed', async () => {
         // Mock window.confirm
         window.confirm = jest.fn(() => true);
-        // @ts-ignore - Fix: Cast resolved value to 'any' to satisfy TypeScript's strict type checking for mocks.
+        // Fix: Cast mock resolved value to 'any' to avoid TypeScript type inference issues with Jest mocks.
         mockClearAllData.mockResolvedValue(undefined as any);
         
         renderSettings();

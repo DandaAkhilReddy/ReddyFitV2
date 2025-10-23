@@ -64,7 +64,7 @@ describe('Dashboard', () => {
         mockGetTodaysMealLogs.mockResolvedValue([]);
         renderDashboard();
 
-        expect(screen.getByText('Loading meal logs...')).toBeInTheDocument();
+        expect(screen.getByText('Loading your dashboard...')).toBeInTheDocument();
 
         await waitFor(() => {
             expect(screen.getByText("You haven't logged any meals today.")).toBeInTheDocument();

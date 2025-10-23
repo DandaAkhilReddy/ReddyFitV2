@@ -1,8 +1,9 @@
 // __tests__/setup.ts
 import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
+import 'fake-indexeddb/auto'; // Mocks indexedDB for dbService tests
 
-// Mock for URL.createObjectURL and revokeObjectURL which are used in frameExtractor and other places
+// Mock for URL.createObjectURL and revokeObjectURL
 global.URL.createObjectURL = jest.fn(() => 'mock-object-url');
 global.URL.revokeObjectURL = jest.fn();
 
@@ -31,6 +32,7 @@ class MockMediaRecorder {
     start() {
         this.state = 'recording';
         this.onstart?.();
+        // Simulate data becoming available shortly after starting
         setTimeout(() => {
             if (this.ondataavailable) {
                 const blob = new Blob(['mock audio data'], { type: this.mimeType });
@@ -65,6 +67,8 @@ const localStorageMock = (() => {
     clear: () => {
       store = {};
     },
+    length: Object.keys(store).length,
+    key: (index: number) => Object.keys(store)[index] || null,
   };
 })();
 
@@ -87,6 +91,3 @@ Object.defineProperty(window, 'matchMedia', {
       dispatchEvent: jest.fn(),
     })),
 });
-
-// Mock for indexedDB used in dbService
-import 'fake-indexeddb/auto';

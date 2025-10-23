@@ -90,7 +90,7 @@ describe('Shared Components', () => {
          it('should render all icons without crashing', () => {
             // This is a simple smoke test to ensure all icon components are valid React components
             Object.values(Icons).forEach((IconComponent) => {
-                // Some items might not be components, so we check
+                // Some items in an export might not be components, so we check
                 if (typeof IconComponent === 'function' && /^[A-Z]/.test(IconComponent.name)) {
                     render(<IconComponent />);
                 }

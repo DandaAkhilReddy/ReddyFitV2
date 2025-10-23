@@ -20,14 +20,8 @@ jest.mock('../../firebase', () => ({
     },
 }));
 
-jest.mock('../../services/firestoreService', () => ({
-    getUserProfile: jest.fn(),
-    createUserProfile: jest.fn(),
-}));
-
-jest.mock('../../hooks/useToast', () => ({
-    useToast: jest.fn(),
-}));
+jest.mock('../../services/firestoreService');
+jest.mock('../../hooks/useToast');
 
 const mockOnAuthStateChanged = auth.onAuthStateChanged as jest.MockedFunction<typeof auth.onAuthStateChanged>;
 const mockSignIn = auth.signInWithEmailAndPassword as jest.MockedFunction<typeof auth.signInWithEmailAndPassword>;
@@ -61,8 +55,9 @@ describe('useAuth', () => {
         
         mockGetUserProfile.mockResolvedValue(mockProfile);
 
-        let onAuthStateChangedCallback: (user: firebase.User | null) => void;
-        mockOnAuthStateChanged.mockImplementation((callback: (user: firebase.User | null) => void) => {
+        let onAuthStateChangedCallback: (user: firebase.User | null) => void = () => {};
+        // Fix: Type the callback as 'any' to avoid signature mismatch errors in the mock implementation.
+        mockOnAuthStateChanged.mockImplementation((callback: any) => {
             onAuthStateChangedCallback = callback;
             return () => {}; // Return an unsubscribe function
         });
@@ -81,8 +76,9 @@ describe('useAuth', () => {
     });
 
     it('should set user to null when auth state changes to logged out', async () => {
-        let onAuthStateChangedCallback: (user: firebase.User | null) => void;
-        mockOnAuthStateChanged.mockImplementation((callback: (user: firebase.User | null) => void) => {
+        let onAuthStateChangedCallback: (user: firebase.User | null) => void = () => {};
+        // Fix: Type the callback as 'any' to avoid signature mismatch errors in the mock implementation.
+        mockOnAuthStateChanged.mockImplementation((callback: any) => {
             onAuthStateChangedCallback = callback;
             return () => {};
         });
